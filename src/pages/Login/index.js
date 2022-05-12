@@ -12,7 +12,7 @@ import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import Cookies from "js-cookie";
+import jwtDecode from "jwt-decode";
 
 export function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -31,12 +31,14 @@ export function Login() {
         try {
             setIsLoading(true);
             const { data: loginData } = await api.auth.login(data);
-            auth.setToken(loginData.token);
-            Cookies.set("refreshToken", loginData.refreshToken);
-            const { data: userData } = await api.auth.getProfile(loginData.username);
-            Cookies.set("user-data", JSON.stringify(userData));
-            auth.setUser(userData);
-            auth.setIsLogin(true);
+            auth.setToken(loginData.accessToken, loginData.refreshToken);
+
+            const decodedToken = jwtDecode(loginData.accessToken);
+            const { data: userData } = await api.auth.getProfile(decodedToken.sub);
+
+            auth.setUserData(userData);
+            // Cookies.set("user-data", JSON.stringify(userData));
+            // auth.setUser(userData);
         } catch (e) {
         if (e.response.status === 422) {
             Object.keys(e.response.data.errors).forEach((key) => {

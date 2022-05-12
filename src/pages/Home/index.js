@@ -1,4 +1,5 @@
-import { Grid, Container, Typography } from "@mui/material";
+import { Grid, Container, Typography, Button } from "@mui/material";
+import api from "../../services/api";
 
 export function Home() {
     return (
@@ -11,6 +12,15 @@ export function Home() {
                 <Typography variant="body1" gutterBottom>
                     This is demo app with login and registration
                 </Typography>
+                <Button 
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={() => {
+                        api.auth.test();
+                }}>
+                    Запрос
+                </Button>
             </Grid>
         </Grid>
     </Container>

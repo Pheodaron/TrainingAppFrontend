@@ -2,59 +2,85 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import Cookies from "js-cookie";
 import api from "../../services/api";
-import jwt_decode from "jwt-decode";
 
 function AuthProvider(props) {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [isLogin, setIsLogin] = useState(false);
     const [user, setUser] = useState(null);
     const [token, setTokenData] = useState(null);
 
-    const setToken = useCallback((tokenData) => {
-        setTokenData(tokenData);
-
+    const setToken = useCallback((tokenData, refreshToken) => {
         if(tokenData) {
             Cookies.set("auth-token", tokenData);
+            Cookies.set("refreshToken", refreshToken);
+            setTokenData(tokenData);
+        } else {
+            console.log("remove token data - 1")
+            setTokenData(null);
+            Cookies.remove("auth-token");
+            Cookies.remove("refreshToken");
+        }
+    }, []);
+
+    const setUserData = useCallback((userData) => {
+        if(userData) {
+            setUser(userData);
+            Cookies.set("user-data", JSON.stringify(userData));
+        } else {
+            setUser(null);
+            Cookies.remove("user-data");
         }
     }, []);
 
     const logOut = useCallback(() => {
-        setUser(null);
+        setUserData(null);
         setToken(null);
-        setIsLogin(null);
-        Cookies.remove("auth-token");
-        Cookies.remove("user-data");
-        Cookies.remove("refreshToken");
+
     }, [setToken]);
 
     const loadData = useCallback(async () => {
+        setIsLoaded(false);
         const tokenData = Cookies.get("auth-token");
-        const stringUserData = Cookies.get("user-data");
-        if(stringUserData) {
+        if (tokenData) {
             const userData = JSON.parse(Cookies.get("user-data"));
+            // setUserData(userData);
             setUser(userData);
+        } else {
+            setTokenData(null);
+            setUserData(null);
         }
-        setTokenData(tokenData);
+        setIsLoaded(true);
+        // setIsLoaded(false);
+        // const tokenData = Cookies.get("auth-token");
+        // if (tokenData) {
+        //     const userData = JSON.parse(Cookies.get("user-data"));
+        //     setUserData(userData);
+        // } else {
+        //     console.log(tokenData)
+        //     console.log("setTokenDAta")
+        //     setTokenData(null);
+        // }
 
-        try {
-            if (tokenData) {
-                const { data } = await api.auth.getProfile(user.username);
-                setUser(data);
-            }
-        } catch { 
-            setToken(null);
-        } finally {
-            setIsLoaded(true);
-        }
-    }, [setToken, isLogin]);
+        // try {
+        //     if (tokenData) {
+        //         const { data } = await api.auth.getProfile(user.username);
+        //         setUser(data);
+        //     }
+        // } catch { 
+        //     setToken(null);
+        // } finally {
+        //     setIsLoaded(true);
+        // }
+    }, [setToken]);
+
+    // useEffects----------------------------------------------------------
 
     useEffect(() => {
         loadData();
-    }, [loadData]);
+    }, [loadData]); //loadData
 
-    useEffect(() => {
-        console.log(contextValue);
-    },[isLoaded])
+    // useEffect(() => {
+    //     console.log(contextValue);
+    // },[isLoaded])
 
     useEffect(() => {
         if(user) {
@@ -65,16 +91,15 @@ function AuthProvider(props) {
     const contextValue = useMemo(
         () => ({
             isLoaded,
-            isLogin,
             user,
             token,
             setIsLoaded,
-            setIsLogin,
             setUser,
             setToken,
+            setUserData,
             logOut
         }),
-        [isLoaded, isLogin, user, token, setIsLoaded, setIsLogin, setToken, logOut]
+        [isLoaded, user, token, setIsLoaded, setToken, logOut]
     );
 
     return (
