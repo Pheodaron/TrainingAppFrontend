@@ -1,64 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import Cookies from "js-cookie";
-import api from "../../services/api";
+import useUserData from "../../hooks/useUserData";
+import useTokenData from "../../hooks/useTokenData";
+import useLoadData from "../../hooks/useLoadData";
 
 function AuthProvider(props) {
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [user, setUser] = useState(null);
-    const [token, setTokenData] = useState(null);
-
-    const setToken = (tokenData, refreshToken) => {
-        if(tokenData) {
-            Cookies.set("auth-token", tokenData);
-            Cookies.set("refreshToken", refreshToken);
-            setTokenData(tokenData);
-        } else {
-            console.log("remove token data - 1")
-            setTokenData(null);
-            Cookies.remove("auth-token");
-            Cookies.remove("refreshToken");
-        }
-    };
-
-    const setUserData = (userData) => {
-        if(userData) {
-            setUser(userData);
-            Cookies.set("user-data", JSON.stringify(userData));
-        } else {
-            setUser(null);
-            Cookies.remove("user-data");
-        }
-    };
+    const [isLoaded, setIsLoaded] = useState(true);
+    const [user, setUserData] = useUserData(null);
+    const [token, setTokenData] = useTokenData(null);
 
     const logOut = () => {
         setUserData(null);
-        setToken(null);
+        setTokenData(null);
     };
 
-    const loadData = async () => {
-        setIsLoaded(false);
-        const tokenData = Cookies.get("auth-token");
-        if (tokenData) {
-            const userData = JSON.parse(Cookies.get("user-data"));
-            // setUserData(userData);
-            setUser(userData);
-        } else {
-            setTokenData(null);
-            setUserData(null);
-        }
-        setIsLoaded(true);
-    };
-
-    useEffect(() => {
-        loadData();
-    }, [loadData]); //loadData
-
-    useEffect(() => {
-        if(user) {
-            Cookies.set("user-data", JSON.stringify(user));
-        }
-    }, [user]);
+    useLoadData(setIsLoaded, setTokenData, setUserData);
 
     const contextValue = 
         {
@@ -66,8 +22,7 @@ function AuthProvider(props) {
             user,
             token,
             setIsLoaded,
-            setUser,
-            setToken,
+            setTokenData,
             setUserData,
             logOut
         };

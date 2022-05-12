@@ -16,9 +16,11 @@ export function Home() {
                     variant="contained"
                     color="primary"
                     type="submit"
-                    onClick={() => {
-                        api.auth.test();
-                }}>
+                    onClick={ async () => { 
+                            const data = await api.auth.test();
+                            console.log(data.data);
+                            }
+                }>
                     Запрос
                 </Button>
             </Grid>

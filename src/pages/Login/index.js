@@ -31,14 +31,12 @@ export function Login() {
         try {
             setIsLoading(true);
             const { data: loginData } = await api.auth.login(data);
-            auth.setToken(loginData.accessToken, loginData.refreshToken);
+            auth.setTokenData(loginData.accessToken, loginData.refreshToken);
 
             const decodedToken = jwtDecode(loginData.accessToken);
             const { data: userData } = await api.auth.getProfile(decodedToken.sub);
 
             auth.setUserData(userData);
-            // Cookies.set("user-data", JSON.stringify(userData));
-            // auth.setUser(userData);
         } catch (e) {
         if (e.response.status === 422) {
             Object.keys(e.response.data.errors).forEach((key) => {
