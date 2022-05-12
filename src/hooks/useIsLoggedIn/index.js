@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 function useIsLoggedIn(token, user) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        setIsLoggedIn(Boolean(Cookies.get("auth-token")));
+        setIsLoggedIn(Boolean(JSON.parse(window.localStorage.getItem("authToken"))));
     }, [token]);
 
     return [isLoggedIn, setIsLoggedIn];

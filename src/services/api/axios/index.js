@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 import jwt_decode from "jwt-decode";
 
 const axiosInstance = axios.create();
@@ -9,30 +8,22 @@ const axiosRefreshInstance = axios.create();
 axiosRefreshInstance.interceptors.response.use(
     response => response,
     error => {
-            Cookies.remove("authToken");
-            Cookies.remove("user-data");
+            window.localStorage.removeItem('authToken');
+            window.localStorage.removeItem('userData');
             return Promise.reject(error);
-        // if(error.response.status === 403 || error.response.status === 401) {
-        //     console.log("Error 403");
-        //     Cookies.remove("authToken");
-        //     Cookies.remove("user-data");
-        // }
     }
 )
 
 const tokenUpdate = async (refreshToken) => {
     const data = await axiosRefreshInstance.post("http://localhost:8080/app/refresh-token", {"refreshToken": refreshToken});
     if (!data) {
-        Cookies.set("auth-token", data.accessToken);
-        Cookies.set("refreshToken", data.refreshToken);
+        window.localStorage.setItem("authToken", JSON.stringify({
+            "accessToken": data.accessToken,
+            "refreshToken": data.refreshToken,
+        }));
         return data.accessToken;
     }
     console.log(data);
-    // if(!data) {
-    //     Cookies.set("auth-token", data.accessToken);
-    //     Cookies.set("refreshToken", data.refreshToken);
-    //     return data.accessToken;
-    // }
 }
 
 const isExpired = (accessToken) => {
@@ -43,16 +34,15 @@ const isExpired = (accessToken) => {
 
 axiosInstance.interceptors.request.use(
     (config) => {
-        const authToken = Cookies.get("auth-token");
-        
-        if(authToken) {
-            if(isExpired(authToken)) {
-                const refreshToken = Cookies.get("refreshToken");
-                console.log(refreshToken);
-                authToken = tokenUpdate(refreshToken);
+        const data = window.localStorage.getItem("authToken");
+        if(data) {
+            let { accessToken, refreshToken } = JSON.parse(data);
+            if(accessToken) {
+                if(isExpired(accessToken)) {
+                    accessToken = tokenUpdate(refreshToken);
+                }
+                config.headers.Authorization = `Bearer_${accessToken}`;
             }
-
-            config.headers.Authorization = `Bearer_${authToken}`;
         }
 
         return config;

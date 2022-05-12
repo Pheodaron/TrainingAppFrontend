@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { useState} from "react";
 
 function useUserData(initialState) {
@@ -7,10 +6,10 @@ function useUserData(initialState) {
     const setUserData = (userData) => {
         if(userData) {
             setUser(userData);
-            Cookies.set("user-data", JSON.stringify(userData));
+            window.localStorage.setItem("userData", JSON.stringify(userData));
         } else {
             setUser(null);
-            Cookies.remove("user-data");
+            window.localStorage.removeItem("userData");
         }
     };
 

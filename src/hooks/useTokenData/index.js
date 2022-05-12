@@ -1,17 +1,18 @@
 import { useState } from "react";
-import Cookies from "js-cookie";
-
 function useTokenData(initialState) {
     const [token, setToken] = useState(initialState);
 
     const setTokenData = (tokenData, refreshToken) => {
         if(tokenData) {
-            Cookies.set("auth-token", tokenData);
-            Cookies.set("refreshToken", refreshToken);
+            window.localStorage.setItem("authToken", JSON.stringify(
+                { 
+                    "accessToken": tokenData, 
+                    "refreshToken": refreshToken
+                }));
+                
             setToken(tokenData);
         } else {
-            Cookies.remove("auth-token");
-            Cookies.remove("refreshToken");
+            window.localStorage.removeItem("authToken");
             setToken(null);
         }
     };
