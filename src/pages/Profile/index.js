@@ -8,10 +8,9 @@ import {
     Snackbar,  
 } from "@mui/material"
 import useAuth from "../../hooks/useAuth";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
-import api from "../../services/api";
 
 function Profile() {
     const auth = useAuth();
@@ -45,25 +44,6 @@ function Profile() {
         }
     };
 
-    const loadData = useCallback(async () => {
-        const { data: userData } = await api.auth.getProfile(auth.user);
-        // console.log(userData);
-
-        reset({
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-        });
-    }, [reset]);
-
-    // useEffect(() => {
-    //   const fetchData = async () => {
-    //     const {data: userData} = await api.auth.getProfile(auth.user.username);
-    //     auth.setUser(userData);
-    //   }
-
-    //   fetchData();
-    // },[]);
-
       return (
         <Container maxWidth="xs">
           <Grid container spacing={3}>
@@ -77,7 +57,7 @@ function Profile() {
                 <Controller
                   name="firstName"
                   control={control}
-                  defaultValue=""
+                  defaultValue={auth.user.firstName}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -95,7 +75,7 @@ function Profile() {
                 <Controller
                   name="lastName"
                   control={control}
-                  defaultValue=""
+                  defaultValue={auth.user.lastName}
                   render={({ field }) => (
                     <TextField
                       {...field}

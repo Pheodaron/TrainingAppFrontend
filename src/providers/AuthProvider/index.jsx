@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import Cookies from "js-cookie";
 import api from "../../services/api";
@@ -8,7 +8,7 @@ function AuthProvider(props) {
     const [user, setUser] = useState(null);
     const [token, setTokenData] = useState(null);
 
-    const setToken = useCallback((tokenData, refreshToken) => {
+    const setToken = (tokenData, refreshToken) => {
         if(tokenData) {
             Cookies.set("auth-token", tokenData);
             Cookies.set("refreshToken", refreshToken);
@@ -19,9 +19,9 @@ function AuthProvider(props) {
             Cookies.remove("auth-token");
             Cookies.remove("refreshToken");
         }
-    }, []);
+    };
 
-    const setUserData = useCallback((userData) => {
+    const setUserData = (userData) => {
         if(userData) {
             setUser(userData);
             Cookies.set("user-data", JSON.stringify(userData));
@@ -29,15 +29,14 @@ function AuthProvider(props) {
             setUser(null);
             Cookies.remove("user-data");
         }
-    }, []);
+    };
 
-    const logOut = useCallback(() => {
+    const logOut = () => {
         setUserData(null);
         setToken(null);
+    };
 
-    }, [setToken]);
-
-    const loadData = useCallback(async () => {
+    const loadData = async () => {
         setIsLoaded(false);
         const tokenData = Cookies.get("auth-token");
         if (tokenData) {
@@ -49,38 +48,11 @@ function AuthProvider(props) {
             setUserData(null);
         }
         setIsLoaded(true);
-        // setIsLoaded(false);
-        // const tokenData = Cookies.get("auth-token");
-        // if (tokenData) {
-        //     const userData = JSON.parse(Cookies.get("user-data"));
-        //     setUserData(userData);
-        // } else {
-        //     console.log(tokenData)
-        //     console.log("setTokenDAta")
-        //     setTokenData(null);
-        // }
-
-        // try {
-        //     if (tokenData) {
-        //         const { data } = await api.auth.getProfile(user.username);
-        //         setUser(data);
-        //     }
-        // } catch { 
-        //     setToken(null);
-        // } finally {
-        //     setIsLoaded(true);
-        // }
-    }, [setToken]);
-
-    // useEffects----------------------------------------------------------
+    };
 
     useEffect(() => {
         loadData();
     }, [loadData]); //loadData
-
-    // useEffect(() => {
-    //     console.log(contextValue);
-    // },[isLoaded])
 
     useEffect(() => {
         if(user) {
@@ -88,8 +60,8 @@ function AuthProvider(props) {
         }
     }, [user]);
 
-    const contextValue = useMemo(
-        () => ({
+    const contextValue = 
+        {
             isLoaded,
             user,
             token,
@@ -98,9 +70,7 @@ function AuthProvider(props) {
             setToken,
             setUserData,
             logOut
-        }),
-        [isLoaded, user, token, setIsLoaded, setToken, logOut]
-    );
+        };
 
     return (
         <AuthContext.Provider value={contextValue}>
