@@ -3,17 +3,18 @@ import { AuthContext } from "../../context/AuthContext";
 import useUserData from "../../hooks/useUserData";
 import useTokenData from "../../hooks/useTokenData";
 import useLoadData from "../../hooks/useLoadData";
-import useIsLoggedIn from "../../hooks/useIsLogin";
+import useIsLoggedIn from "../../hooks/useIsLoggedIn";
 
 function AuthProvider(props) {
     const [isLoaded, setIsLoaded] = useState(true);
     const [user, setUserData] = useUserData(null);
     const [token, setTokenData] = useTokenData(null);
-    const isLoggedIn = useIsLoggedIn(token);
+    const [isLoggedIn, setIsLoggedIn] = useIsLoggedIn(token, user);
 
     const logOut = () => {
         setUserData(null);
         setTokenData(null);
+        setIsLoggedIn(false);
     };
 
     useLoadData(setIsLoaded, setTokenData, setUserData);

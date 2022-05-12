@@ -17,7 +17,6 @@ function useLoadData(setIsLoaded, setTokenData, setUserData) {
     
     useEffect(() => {
         loadData();
-        console.log("load data")
     }, []);
 }
 

@@ -31,7 +31,7 @@ function App() {
             </Button>
           </div>
           {auth.isLoaded && 
-            (auth.user ? (
+            (auth.isLoggedIn ? (
               <>
                 <Button color="inherit" component={Link} to="/profile">
                   {auth.user.firstName} {auth.user.lastName}
