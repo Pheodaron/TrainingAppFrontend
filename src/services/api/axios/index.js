@@ -3,25 +3,22 @@ import jwt_decode from "jwt-decode";
 
 const axiosInstance = axios.create();
 
-const axiosRefreshInstance = axios.create();
-
-axiosRefreshInstance.interceptors.response.use(
-    response => response,
-    error => {
-            window.localStorage.removeItem('authToken');
-            window.localStorage.removeItem('userData');
-            return Promise.reject(error);
-    }
-)
+export const axiosRefreshInstance = axios.create();
 
 const tokenUpdate = async (refreshToken) => {
-    const data = await axiosRefreshInstance.post("http://localhost:8080/app/refresh-token", {"refreshToken": refreshToken});
-    if (!data) {
-        window.localStorage.setItem("authToken", JSON.stringify({
-            "accessToken": data.accessToken,
-            "refreshToken": data.refreshToken,
-        }));
-        return data.accessToken;
+    const { data } = await axiosRefreshInstance.post("http://localhost:8080/app/refresh-token", {"refreshToken": refreshToken});
+    if (data) {
+        const { accessToken, refreshToken } = data;
+        console.log("refreshed token...");
+        console.log(data);
+        console.log(accessToken);
+        console.log(refreshToken);
+        window.localStorage.setItem("authToken", JSON.stringify(
+            { 
+                "accessToken": accessToken, 
+                "refreshToken": refreshToken
+            }));
+        return accessToken;
     }
     console.log(data);
 }

@@ -8,15 +8,33 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 import Routes from "./routes/Routes";
+import { axiosRefreshInstance } from './services/api/axios';
+import { useEffect } from 'react';
 
 function App() {
   const auth = useAuth();
   const navigate = useNavigate();
-
+  
   const onLogOut = () => {
     auth.logOut();
     navigate("/login");
   };
+
+  useEffect(() => {
+    console.log("addResponseInterceptor");
+    const responseInterceptor = axiosRefreshInstance.interceptors.response.use(
+        response => response,
+        error => {
+            onLogOut();
+            return Promise.reject(error);
+        }
+    )
+    return () => {
+      axiosRefreshInstance.interceptors.response.eject(responseInterceptor);
+      console.log("removeResponseInterceptor");
+    }
+}, [])
+
 
   return (
     <div>

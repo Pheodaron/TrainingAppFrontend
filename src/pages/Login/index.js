@@ -35,7 +35,6 @@ export function Login() {
 
             const decodedToken = jwtDecode(loginData.accessToken);
             const { data: userData } = await api.auth.getProfile(decodedToken.sub);
-
             auth.setUserData(userData);
         } catch (e) {
         if (e.response.status === 422) {

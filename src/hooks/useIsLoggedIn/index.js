@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 
-function useIsLoggedIn(token, user) {
+function useIsLoggedIn(token) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        setIsLoggedIn(Boolean(JSON.parse(window.localStorage.getItem("authToken"))));
+        const data = window.localStorage.getItem("authToken");
+        setIsLoggedIn(Boolean(data));
     }, [token]);
 
     return [isLoggedIn, setIsLoggedIn];
