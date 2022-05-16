@@ -5,6 +5,7 @@ import {
   Container,
   Button,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
@@ -16,6 +17,7 @@ import jwtDecode from "jwt-decode";
 
 export function Login() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isInvalid, setIsInvalid] = useState(false);
     const auth = useAuth();
 
     const {
@@ -37,6 +39,8 @@ export function Login() {
             const { data: userData } = await api.auth.getProfile(decodedToken.sub);
             auth.setUserData(userData);
         } catch (e) {
+          setIsInvalid(true);
+          console.log("isInvalid")
         if (e.response.status === 422) {
             Object.keys(e.response.data.errors).forEach((key) => {
             setError(key, {
@@ -116,6 +120,14 @@ export function Login() {
               </Grid>
             </Grid>
           </form>
+          <Snackbar
+            open={isInvalid}
+            autoHideDuration={6000}
+            onClose={() => {
+              setIsInvalid(false);
+            }}
+            message="Username or password is invalid!"
+          />
         </Container>
       );
 }

@@ -1,4 +1,4 @@
-import { Grid, Container, Typography, Button } from "@mui/material";
+import { Grid, Container, Typography, Button, Snackbar } from "@mui/material";
 import api from "../../services/api";
 
 export function Home() {
@@ -17,8 +17,8 @@ export function Home() {
                     color="primary"
                     type="submit"
                     onClick={ async () => { 
-                            const data = await api.auth.test();
-                            console.log(data.data);
+                            const { data } = await api.auth.test();
+                            console.log(data);
                             }
                 }>
                     Запрос
