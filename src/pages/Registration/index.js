@@ -8,42 +8,24 @@ import {
 } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
-import api from "../../services/api";
-import useAuth from "../../hooks/useAuth";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import {
+  Link,
+  // useNavigate
+} from "react-router-dom";
 
 export function Registration() {
-    const [isLoading, setIsLoading] = useState(false);
-    const auth = useAuth();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
   
     const {
       control,
       handleSubmit,
       formState: { errors },
-      setError,
     } = useForm({
       resolver: yupResolver(validationSchema),
     });
   
     const onSubmit = async (data) => {
-      try {
-        setIsLoading(true);
-        await api.auth.registration(data);
-        navigate("/login");
-      } catch (e) {
-        if (e.response.status === 422) {
-          Object.keys(e.response.data.errors).forEach((key) => {
-            setError(key, {
-              type: "manual",
-              message: e.response.data.errors[key],
-            });
-          });
-        }
-      } finally {
-        setIsLoading(false);
-      }
+      // TODO: register
     };
   
     return (
@@ -150,7 +132,6 @@ export function Registration() {
                 variant="contained"
                 color="primary"
                 type="submit"
-                disabled={isLoading}
               >
                 Registration
               </Button>

@@ -1,12 +1,12 @@
-import axios from "../axios";
+import axiosInstance from "../axios";
 
-const endpoints = {
-    registration: (data) => axios.post("http://localhost:8080/app/register", data),
-    login: (data) => axios.post("http://localhost:8080/app/login", data),
-    forgotPassword: (data) => axios.post("/forgot/password", data),
-    getProfile: (username) => axios.get(`http://localhost:8080/user/get/${username}`),
-    refreshToken: (data) => axios.post("http://localhost:8080/app/refresh-token", data),
-    test: () => axios.get("http://localhost:8080/app/test/get"),
+const authEndpoints = {
+    registration: (data) => axiosInstance.post("/app/register", data),
+    login: (data) => axiosInstance.post("/app/login", data),
+    forgotPassword: (data) => axiosInstance.post("/forgot/password", data),
+    getProfile: (username) => axiosInstance.get(`/user/get/${username}`),
+    refreshToken: (data) => axiosInstance.post("/app/refresh-token", data),
+    test: () => axiosInstance.get("/app/test/get"),
 };
 
-export default endpoints;
+export default authEndpoints;

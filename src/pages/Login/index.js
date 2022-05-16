@@ -5,57 +5,30 @@ import {
   Container,
   Button,
   Typography,
-  Snackbar,
+  // Snackbar,
 } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
-import api from "../../services/api";
-import useAuth from "../../hooks/useAuth";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import jwtDecode from "jwt-decode";
-import { useNavigate } from "../../../node_modules/react-router-dom/index";
+import { Link, useNavigate } from "react-router-dom";
+import allEndpoints from "services/api";
+import { login } from "models/auth";
 
 export function Login() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInvalid, setIsInvalid] = useState(false);
   const navigate = useNavigate();
-  const auth = useAuth();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    setError,
   } = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const onSubmit = async (data) => {
-    try {
-      setIsLoading(true);
-      const { data: loginData } = await api.auth.login(data);
-      // auth.setTokenData(loginData.accessToken, loginData.refreshToken);
-
-      const decodedToken = jwtDecode(loginData.accessToken);
-      const { data: userData } = await api.auth.getProfile(decodedToken.sub);
-      auth.setUserData(userData);
-      navigate('/');
-    } catch (e) {
-      setIsInvalid(true);
-      console.log("isInvalid")
-      if (e.response.status === 422) {
-        Object.keys(e.response.data.errors).forEach((key) => {
-          setError(key, {
-            type: "manual",
-            message: e.response.data.errors[key],
-          });
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const onSubmit = handleSubmit(async credentials => {
+    const {data: token} = await allEndpoints.auth.login(credentials);
+    login(token);
+    navigate('/');
+  });
 
   return (
     <Container maxWidth="xs">
@@ -64,7 +37,7 @@ export function Login() {
           <Typography variant="h6">Login</Typography>
         </Grid>
       </Grid>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={onSubmit}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Controller
@@ -108,7 +81,6 @@ export function Login() {
               variant="contained"
               color="primary"
               type="submit"
-              disabled={isLoading}
             >
               Login
             </Button>
@@ -123,14 +95,14 @@ export function Login() {
           </Grid>
         </Grid>
       </form>
-      <Snackbar
+      {/* <Snackbar
         open={isInvalid}
         autoHideDuration={6000}
         onClose={() => {
           setIsInvalid(false);
         }}
         message="Username or password is invalid!"
-      />
+      /> */}
     </Container>
   );
 }
