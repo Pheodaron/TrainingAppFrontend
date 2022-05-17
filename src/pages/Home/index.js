@@ -1,4 +1,10 @@
-import { Grid, Container, Typography, Button, Snackbar } from "@mui/material";
+import {
+    Grid,
+    Container,
+    Typography,
+    Button,
+    // Snackbar
+} from "@mui/material";
 import api from "../../services/api";
 
 export function Home() {
