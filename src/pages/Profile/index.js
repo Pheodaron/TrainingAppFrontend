@@ -7,13 +7,14 @@ import {
     Typography,
     Snackbar,  
 } from "@mui/material"
-import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
+import { useStore } from "effector-react";
+import { $auth } from "../../models/auth";
 
 function Profile() {
-    const auth = useAuth();
+    const auth = useStore($auth);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -22,7 +23,7 @@ function Profile() {
         handleSubmit,
         formState: { errors },
         setError,
-        reset,
+        // reset,
       } = useForm({
         resolver: yupResolver(validationSchema),
       });

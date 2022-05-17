@@ -1,10 +1,12 @@
-import { Navigate, Outlet } from "../../node_modules/react-router-dom/index";
-import useAuth from "../hooks/useAuth/index";
+import { CircularProgress } from "@mui/material";
+import { useStore } from "effector-react";
+import { $auth } from "models/auth";
+import { Outlet } from "react-router-dom";
 
 const AppLayout = () => {
-    const auth = useAuth();
-
-    if (!auth?.user) return <Navigate to='/login'/>;
+    const auth = useStore($auth);
+    
+    if (auth.isLoading) return <CircularProgress/>;
     return (
         <>
             <Outlet />
