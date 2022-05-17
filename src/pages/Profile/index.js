@@ -57,7 +57,7 @@ function Profile() {
                 <Controller
                   name="firstName"
                   control={control}
-                  defaultValue={auth.user.firstName}
+                  defaultValue={auth?.user.firstName}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -75,7 +75,7 @@ function Profile() {
                 <Controller
                   name="lastName"
                   control={control}
-                  defaultValue={auth.user.lastName}
+                  defaultValue={auth?.user.lastName}
                   render={({ field }) => (
                     <TextField
                       {...field}

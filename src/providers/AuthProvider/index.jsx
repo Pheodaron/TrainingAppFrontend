@@ -1,38 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import useUserData from "../../hooks/useUserData";
-import useTokenData from "../../hooks/useTokenData";
-import useIsLoggedIn from "../../hooks/useIsLoggedIn";
-import useLoadData from "../../hooks/useLoadData";
+import jwtDecode from "jwt-decode";
+import { isUndefined } from "lodash";
+
+const STORAGE_KEY = "TOKEN_STORAGE";
 
 function AuthProvider(props) {
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [user, setUserData] = useUserData(null);
-    const [token, setTokenData] = useTokenData(null);
-    const [isLoggedIn, setIsLoggedIn] = useIsLoggedIn(token);
+    const [token, setToken] = useState(undefined);
 
-    useLoadData(setIsLoaded, setTokenData, setUserData);
-
-    const logOut = () => {
-        setUserData(null);
-        setTokenData(null);
-        setIsLoggedIn(false);
+    const saveToken = token => {
+        window.localStorage.setItem(
+            STORAGE_KEY,
+            window.atob(JSON.stringify(token))
+        );
+        setToken(token.accessToken);
     };
 
-    const contextValue = 
-        {
-            isLoaded,
-            isLoggedIn,
-            user,
-            token,
-            setIsLoaded,
-            setTokenData,
-            setUserData,
-            logOut
+    useEffect(() => {
+        window.onstorage = event => {
+            if (event.key === STORAGE_KEY)
+                saveToken(JSON.parse(event.newValue));
         };
 
+        return () => {
+            window.onstorage = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const tokenAsB64 = window.localStorage.getItem(STORAGE_KEY);
+        if (tokenAsB64) {
+            const parsed = window.btoa(tokenAsB64);
+            setToken(parsed?.accessToken);
+        } else {
+            setToken(null);
+        }
+    }, []);
+
+    const isLoaded = !isUndefined(token);
+    const isLoggedIn = !!token;
+    const user = token ? jwtDecode(token) : null;
+    const login = token => saveToken(token);
+    const logout = () => {
+        window.localStorage.removeItem(STORAGE_KEY);
+        setToken(null);
+    }
+
     return (
-        <AuthContext.Provider value={contextValue}>
+        <AuthContext.Provider value={{
+            isLoaded,
+            token,
+            user,
+            isLoggedIn,
+            login,
+            logout
+        }}>
             {props.children}
         </AuthContext.Provider>
     );
