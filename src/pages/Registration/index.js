@@ -10,12 +10,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import validationSchema from "./validation";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export function Registration() {
     const [isLoading, setIsLoading] = useState(false);
     const auth = useAuth();
+    const navigate = useNavigate();
   
     const {
       control,
@@ -30,9 +31,7 @@ export function Registration() {
       try {
         setIsLoading(true);
         await api.auth.registration(data);
-        const { data: loginData } = await api.auth.login(data);
-        auth.setToken(loginData.token);
-        auth.setUser(loginData.user);
+        navigate("/login");
       } catch (e) {
         if (e.response.status === 422) {
           Object.keys(e.response.data.errors).forEach((key) => {

@@ -1,84 +1,60 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import Cookies from "js-cookie";
-import api from "../../services/api";
-import jwt_decode from "jwt-decode";
+import jwtDecode from "jwt-decode";
+import { isUndefined } from "lodash";
+
+const STORAGE_KEY = "TOKEN_STORAGE";
 
 function AuthProvider(props) {
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [isLogin, setIsLogin] = useState(false);
-    const [user, setUser] = useState(null);
-    const [token, setTokenData] = useState(null);
+    const [token, setToken] = useState(undefined);
 
-    const setToken = useCallback((tokenData) => {
-        setTokenData(tokenData);
+    const saveToken = token => {
+        window.localStorage.setItem(
+            STORAGE_KEY,
+            window.atob(JSON.stringify(token))
+        );
+        setToken(token.accessToken);
+    };
 
-        if(tokenData) {
-            Cookies.set("auth-token", tokenData);
+    useEffect(() => {
+        window.onstorage = event => {
+            if (event.key === STORAGE_KEY)
+                saveToken(JSON.parse(event.newValue));
+        };
+
+        return () => {
+            window.onstorage = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const tokenAsB64 = window.localStorage.getItem(STORAGE_KEY);
+        if (tokenAsB64) {
+            const parsed = window.btoa(tokenAsB64);
+            setToken(parsed?.accessToken);
+        } else {
+            setToken(null);
         }
     }, []);
 
-    const logOut = useCallback(() => {
-        setUser(null);
+    const isLoaded = !isUndefined(token);
+    const isLoggedIn = !!token;
+    const user = token ? jwtDecode(token) : null;
+    const login = token => saveToken(token);
+    const logout = () => {
+        window.localStorage.removeItem(STORAGE_KEY);
         setToken(null);
-        setIsLogin(null);
-        Cookies.remove("auth-token");
-        Cookies.remove("user-data");
-        Cookies.remove("refreshToken");
-    }, [setToken]);
-
-    const loadData = useCallback(async () => {
-        const tokenData = Cookies.get("auth-token");
-        const stringUserData = Cookies.get("user-data");
-        if(stringUserData) {
-            const userData = JSON.parse(Cookies.get("user-data"));
-            setUser(userData);
-        }
-        setTokenData(tokenData);
-
-        try {
-            if (tokenData) {
-                const { data } = await api.auth.getProfile(user.username);
-                setUser(data);
-            }
-        } catch { 
-            setToken(null);
-        } finally {
-            setIsLoaded(true);
-        }
-    }, [setToken, isLogin]);
-
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
-
-    useEffect(() => {
-        console.log(contextValue);
-    },[isLoaded])
-
-    useEffect(() => {
-        if(user) {
-            Cookies.set("user-data", JSON.stringify(user));
-        }
-    }, [user]);
-
-    const contextValue = useMemo(
-        () => ({
-            isLoaded,
-            isLogin,
-            user,
-            token,
-            setIsLoaded,
-            setIsLogin,
-            setUser,
-            setToken,
-            logOut
-        }),
-        [isLoaded, isLogin, user, token, setIsLoaded, setIsLogin, setToken, logOut]
-    );
+    }
 
     return (
-        <AuthContext.Provider value={contextValue}>
+        <AuthContext.Provider value={{
+            isLoaded,
+            token,
+            user,
+            isLoggedIn,
+            login,
+            logout
+        }}>
             {props.children}
         </AuthContext.Provider>
     );
